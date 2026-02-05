@@ -3,4 +3,20 @@ then paste these two lines below and hit enter twice:
 protocol=https
 host=github.com
 
-initialize repository: git remote set-url origin https://github.com/ml-guppy-lab/LoveBytes.git
+initialize repository: 
+git remote add origin https://github.com/ml-guppy-lab/LoveBytes.git
+git remote set-url origin https://github.com/ml-guppy-lab/LoveBytes.git
+
+----------------------------------------------------------------------------------------------
+************ backend *******************************************************
+----------------------------------------------------------------------------------------------
+virtual environment: 
+python3 -m venv venv
+source venv/bin/activate
+
+pip install -r requirements.txt
+
+python chatbot.py
+
+to run backend:
+uvicorn main:app --reload
