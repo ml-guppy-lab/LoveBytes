@@ -20,3 +20,19 @@ python chatbot.py
 
 to run backend:
 uvicorn main:app --reload
+
+------ using ollama----------
+brew install ollama
+ollama serve
+
+using deepseek and llama 3.1 LLMs
+
+----------------------------------------------------------------------------------------------
+************ frontend *******************************************************
+----------------------------------------------------------------------------------------------
+
+npm create vite@latest . -- --template react
+npm install
+npm install bootstrap
+import 'bootstrap/dist/css/bootstrap.min.css'; in src/App.jsx
+npm run dev
