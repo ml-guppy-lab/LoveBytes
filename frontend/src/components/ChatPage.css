@@ -1,0 +1,83 @@
+/* Full-page neon blue background */
+.chat-bg {
+  min-height: 100vh;
+  min-width: 100vw;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 52%, #24243e 100%);
+  display: flex;
+  justify-content: center;
+  align-items: stretch;   /* Card fills the vertical space */
+}
+
+/* Chat "card"/pane: full vertical, centered, not full width */
+.chat-card {
+  height: 100vh;
+  max-width: 440px;
+  width: 100%;
+  border-radius: 28px;
+  box-shadow: 0 0 80px #20e3ff55, 0 0 20px #1b1b2f99;
+  background: linear-gradient(135deg, #101e35cc 80%, #223887cc 100%);
+  padding: 0 0 30px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chat messages stack from the bottom up */
+.chat-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse; /* Bubbles grow from bottom! */
+  padding-bottom: 24px;
+}
+
+/* Chat bubble styling */
+.chat-bubble {
+  padding: 14px 22px;
+  border-radius: 24px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.33;
+  max-width: 75vw;
+  display: inline-block;
+  word-break: break-word;
+  box-shadow: 0 4px 18px 0 #1e1e324a;
+}
+
+.neon-bubble-left {
+  background: linear-gradient(90deg,#20e3ff88,#18ddffdd);
+  color: #fff;
+  text-shadow: 0 0 2px #fff, 0 0 8px #20e3ff66;
+  border-bottom-left-radius: 14px;
+}
+
+.neon-bubble-right {
+  background: linear-gradient(90deg,#ff37bf,#2ddcfc 80%);
+  color: #fff;
+  text-shadow: 0 0 2px #fad1e7, 0 0 8px #ec9dfdaa;
+  border-bottom-right-radius: 14px;
+}
+
+.chat-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #1e1e328b, 0 0 3px #20e3ff, 0 0 2px #ff3a80;
+  object-fit: cover;
+  background: #23234d;
+}
+
+/* Neon title styles if you use a neon title class */
+.neon-title {
+  font-family: 'Orbitron', 'Montserrat', sans-serif;
+  font-weight: 900;
+  background: linear-gradient(90deg, #fe3a80 10%, #20e3ff 90%);
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow:
+    0 0 3px #fff7,
+    0 0 16px #ff69fd88,
+    0 0 20px #20e3ff77;
+  letter-spacing: 2px;
+  font-size: 28px;
+  margin-bottom: 0.2em;
+}

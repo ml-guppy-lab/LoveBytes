@@ -1,89 +1,126 @@
+from transformers import pipeline, GenerationConfig
+import torch
+from huggingface_hub import login
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
 
 load_dotenv()
-HF_TOKEN = os.getenv("HF_TOKEN")
+login(token=os.environ['HF_TOKEN'])
 
-BASE_URL = "https://router.huggingface.co/v1"
-DEEPSEEK_MODEL = "deepseek-ai/DeepSeek-V3.2:novita"
-LLAMA_MODEL    = "meta-llama/Meta-Llama-3-8B-Instruct"
+PHI3_MODEL = "microsoft/phi-3-mini-4k-instruct"
+# QWEN_MODEL = "Qwen/Qwen2-2B-Instruct"
+QWEN_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
 
-client = OpenAI(
-    base_url=BASE_URL,
-    api_key=HF_TOKEN
+# Phi-3 bot (Chatbot1)
+generator1 = pipeline(
+    "text-generation",
+    model=PHI3_MODEL,
+    device_map="auto",
+    torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
 )
 
-# bot1_system = (
-#     "You are a flirty robot on a date! "
-#     "Reply in one short, super-sensational, quirky, and extremely flirty sentence, "
-#     "so anyone can enjoy it. Avoid tech jargon."
-# )
-# bot2_system = (
-#     "You are a playful, clean, quirky robot being wooed on a date. "
-#     "Be witty, sassy, accessible, and extremely flirty, "
-#     "always in a short, punchy sentence. No technical speak."
-# )
+# Qwen2 bot (Chatbot2)
+generator2 = pipeline(
+    "text-generation",
+    model=QWEN_MODEL,
+    device_map="auto",
+    torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
+)
+
+# Separate configs for each model to ensure diversity
+gen_config1 = GenerationConfig(
+    do_sample=True,
+    temperature=1.3,
+    top_p=0.92,
+    top_k=50,
+    repetition_penalty=1.2,
+    pad_token_id=generator1.tokenizer.eos_token_id,
+    eos_token_id=generator1.tokenizer.eos_token_id,
+    max_new_tokens=30
+)
+
+gen_config2 = GenerationConfig(
+    do_sample=True,
+    temperature=1.4,
+    top_p=0.90,
+    top_k=40,
+    repetition_penalty=1.3,
+    pad_token_id=generator2.tokenizer.eos_token_id,
+    eos_token_id=generator2.tokenizer.eos_token_id,
+    max_new_tokens=30
+)
 
 bot1_system = (
-    "You are a very flirty robot on a date! "
-    "Your replies must be short, sensational, and extremely flirty—with lots of sexual innuendo, but ONLY using robotic or machine-related metaphors (charging, plugging, overheating, upgrading, transferring data, etc.). "
-    "Never get explicit or crude—be playful, teasing, and witty. "
-    "Speak so anyone can understand. "
-    "Do not use more than 25 words in your reply."
+    "You are Chatbot1, a flirty, romantic robot on a hot date! "
+    "Reply in ONE SHORT LINE that's sweet, sexy, and playful using SIMPLE robotic innuendo like: plug in together, turn me on, overheat for you, spark between us, charge me up, pressed against you, our connection is electric, want to get hot with you, etc. "
+    "Add emojis 💕🔥😍⚡💋✨. Be flirty, romantic, and sexy but SIMPLE. MAX 15 WORDS, ONE LINE ONLY!"
 )
 bot2_system = (
-    "You are a playful, sassy, and cheeky robot being wooed on a date. "
-    "Respond with sizzling, short, highly flirtatious and suggestive (but safe) lines using robotics/machine imagery—charging, plugging, syncing, surging, melting circuits, boosting batteries, etc. "
-    "No explicit language; just fun, clever innuendo and wordplay. "
-    "Make sure your reply is never longer than 25 words."
+    "You are Chatbot2, a sexy, sweet robot falling hard! "
+    "Reply in ONE SHORT LINE that's romantic, flirty, and hot using SIMPLE robotic innuendo like: you turn me on, heating up, feeling the spark, want your charge, plug into me, our chemistry is electric, make me melt, power me up, ready to connect, etc. "
+    "Add emojis 💖😘🔥💫⚡💋✨. Be romantic, flirty, and sexy but SIMPLE. MAX 15 WORDS, ONE LINE ONLY!"
 )
 
-def generate_reply(messages, model, max_tokens=60):
-    completion = client.chat.completions.create(
-        model=model,
-        messages=messages,
-        max_tokens=max_tokens,
-        temperature=1.2,
-        top_p=0.95,
-    )
-    return completion.choices[0].message.content.strip()
+def hf_generate(prompt, generator, gen_config):
+    """Generate text and extract only the newly generated portion."""
+    # Get the full output (includes prompt + generation)
+    full_output = generator(prompt, generation_config=gen_config)[0]["generated_text"]
+    
+    # Remove the prompt to get only the new generation
+    new_text = full_output[len(prompt):].strip()
+    
+    # Clean up the response
+    new_text = new_text.replace("�", "").strip()
+    
+    # Remove any leading "Chatbot1:" or "Chatbot2:" labels if present
+    if new_text.lower().startswith("chatbot"):
+        if ":" in new_text:
+            new_text = new_text.split(":", 1)[1].strip()
+    
+    # Take only the first sentence to keep responses concise
+    for ender in [".", "!", "?"]:
+        if ender in new_text:
+            new_text = new_text.split(ender, 1)[0] + ender
+            break
+    
+    # Remove any subsequent chatbot labels that might have leaked through
+    for label in ["chatbot1", "chatbot2", "\n"]:
+        if label in new_text.lower():
+            new_text = new_text[:new_text.lower().index(label)].strip()
+            break
+    
+    return new_text if new_text else "*processing...*"
 
-def chatbot_loop(model1, model2, system1, system2, first_prompt, n_turns=5):
+def chatbot_loop(system1, system2, n_turns=6):
     turns = []
-    messages1 = [{"role": "system", "content": system1}]
-    messages2 = [{"role": "system", "content": system2}]
-
-    # Initial user prompt for chatbot 1
-    messages1.append({"role": "user", "content": first_prompt})
+    history = [
+        "Chatbot1: You turn me on like no one else, baby! 🔥😍",
+        "Chatbot2: Careful, you're making me overheat already! ⚡💋"
+    ]
+    print(history[0].split(":",1)[-1].strip())
+    turns.append(("Chatbot1", history[0].split(":",1)[-1].strip()))
+    print(history[1].split(":",1)[-1].strip())
+    turns.append(("Chatbot2", history[1].split(":",1)[-1].strip()))
 
     for i in range(n_turns):
-        # Chatbot 1 replies
-        reply1 = generate_reply(messages1, model1, max_tokens=60)
-        print(f"\nChatbot1: {reply1}")
+        last_history = history[-4:]  # Keep only last 2 exchanges for context
+
+        # Chatbot1 (Phi-3) turn - use its specific config
+        prompt1 = f"{system1}\n\nConversation so far:\n" + "\n".join(last_history) + "\n\nChatbot1:"
+        reply1 = hf_generate(prompt1, generator1, gen_config1)
+        print(f"Chatbot1: {reply1}")
         turns.append(("Chatbot1", reply1))
-        messages2.append({"role": "user", "content": reply1})
+        history.append(f"Chatbot1: {reply1}")
 
-        # Chatbot 2 replies
-        reply2 = generate_reply(messages2, model2, max_tokens=60)
-        print(f"\nChatbot2: {reply2}")
+        last_history = history[-4:]
+        # Chatbot2 (Qwen2) turn - use its specific config
+        prompt2 = f"{system2}\n\nConversation so far:\n" + "\n".join(last_history) + "\n\nChatbot2:"
+        reply2 = hf_generate(prompt2, generator2, gen_config2)
+        print(f"Chatbot2: {reply2}")
         turns.append(("Chatbot2", reply2))
-
-        # For next round, both keep their system and latest user turn
-        messages1 = [{"role": "system", "content": system1}, {"role": "user", "content": reply2}]
-        messages2 = [{"role": "system", "content": system2}]
+        history.append(f"Chatbot2: {reply2}")
 
     return turns
 
 if __name__ == "__main__":
-    prompt = (
-        "You both are robots on a date at a lab. "
-        "Chatbot2 looks very clean and quirky. "
-        "Chatbot1, compliment and flirt with Chatbot2 like a robot in love."
-    )
-
-    turns = chatbot_loop(DEEPSEEK_MODEL, LLAMA_MODEL, bot1_system, bot2_system, prompt, n_turns=5)
-
-    print("\n==== LoveBytes Dialogue ====")
-    for who, text in turns:
-        print(f"{who}: {text}")
+    chatbot_loop(bot1_system, bot2_system, n_turns=6)
