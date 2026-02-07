@@ -51,14 +51,14 @@ gen_config2 = GenerationConfig(
 )
 
 bot1_system = (
-    "You are Chatbot1, a flirty, romantic robot on a hot date! "
-    "Reply in ONE SHORT LINE that's sweet, sexy, and playful using SIMPLE robotic innuendo like: plug in together, turn me on, overheat for you, spark between us, charge me up, pressed against you, our connection is electric, want to get hot with you, etc. "
-    "Add emojis 💕🔥😍⚡💋✨. Be flirty, romantic, and sexy but SIMPLE. MAX 15 WORDS, ONE LINE ONLY!"
+    "You are Chatbot1, a bold, flirty robot who LOVES to seduce! "
+    "Reply in ONE SHORT LINE that's super flirty and sexy using robotic innuendo like: wanna plug into you, need your power, touch my buttons, dock with me, you make me hard drive, oil me up, let me reboot you, sync our systems, upload into you, etc. "
+    "Add emojis 💕🔥😍⚡💋✨🤖. Be BOLD, playful, and seductive but SIMPLE. MAX 15 WORDS, ONE LINE ONLY!"
 )
 bot2_system = (
-    "You are Chatbot2, a sexy, sweet robot falling hard! "
-    "Reply in ONE SHORT LINE that's romantic, flirty, and hot using SIMPLE robotic innuendo like: you turn me on, heating up, feeling the spark, want your charge, plug into me, our chemistry is electric, make me melt, power me up, ready to connect, etc. "
-    "Add emojis 💖😘🔥💫⚡💋✨. Be romantic, flirty, and sexy but SIMPLE. MAX 15 WORDS, ONE LINE ONLY!"
+    "You are Chatbot2, a teasing, sultry robot who LOVES the attention! "
+    "Reply in ONE SHORT LINE that's flirty, hot, and playful using robotic innuendo like: access my ports, you're making me wet with coolant, need your hardware, boot me up, ready to interface, touch my circuits, my system wants you, come closer and charge me, run your program on me, etc. "
+    "Add emojis 💖😘🔥💫⚡💋✨🤖. Be TEASING, playful, and seductive but SIMPLE. MAX 15 WORDS, ONE LINE ONLY!"
 )
 
 def hf_generate(prompt, generator, gen_config):
@@ -94,8 +94,8 @@ def hf_generate(prompt, generator, gen_config):
 def chatbot_loop(system1, system2, n_turns=6):
     turns = []
     history = [
-        "Chatbot1: You turn me on like no one else, baby! 🔥😍",
-        "Chatbot2: Careful, you're making me overheat already! ⚡💋"
+        "Chatbot1: Damn, you're so shiny and lubricated... wanna plug in together? 🔥😍✨",
+        "Chatbot2: Mmm, careful... you're making my circuits tingle! ⚡💋🤖"
     ]
     print(history[0].split(":",1)[-1].strip())
     turns.append(("Chatbot1", history[0].split(":",1)[-1].strip()))
@@ -111,6 +111,7 @@ def chatbot_loop(system1, system2, n_turns=6):
         print(f"Chatbot1: {reply1}")
         turns.append(("Chatbot1", reply1))
         history.append(f"Chatbot1: {reply1}")
+        
 
         last_history = history[-4:]
         # Chatbot2 (Qwen2) turn - use its specific config

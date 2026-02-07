@@ -42,7 +42,7 @@ function MainForm() {
         <div className="d-flex flex-column align-items-center">
           <Logo />
           <h1 className="mb-4 mt-2 neon-title">LoveBytes</h1>
-          <PromptInput prompt={prompt} setPrompt={setPrompt} />
+          {/* <PromptInput prompt={prompt} setPrompt={setPrompt} /> */}
           <LaunchButton onClick={handleLaunch} />
         </div>
         {loading && <LoadingOverlay />}
