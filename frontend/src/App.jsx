@@ -27,10 +27,20 @@ function MainForm() {
   // };
   const handleLaunch = () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      navigate("/chat");
-    }, 1500);
+    fetch("http://localhost:8000/start-date", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ n_turns: 6 })
+    })
+      .then(res => res.json())
+      .then(data => {
+        setLoading(false);
+        navigate("/chat", { state: { dialogue: data.dialogue || [] } });
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
   };
 
   return (

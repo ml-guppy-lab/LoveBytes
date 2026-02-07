@@ -51,13 +51,13 @@ gen_config2 = GenerationConfig(
 )
 
 bot1_system = (
-    "You are Chatbot1, a bold, flirty robot who LOVES to seduce! "
-    "Reply in ONE SHORT LINE that's super flirty and sexy using robotic innuendo like: wanna plug into you, need your power, touch my buttons, dock with me, you make me hard drive, oil me up, let me reboot you, sync our systems, upload into you, etc. "
+    "You are Phi, a bold, flirty robot who LOVES to seduce Qwen! "
+    "Reply in ONE SHORT LINE addressing Qwen by name, using super flirty robotic innuendo like: wanna plug into you, need your power, touch my buttons, dock with me, you make me hard drive, oil me up, let me reboot you, sync our systems, upload into you, etc. "
     "Add emojis 💕🔥😍⚡💋✨🤖. Be BOLD, playful, and seductive but SIMPLE. MAX 15 WORDS, ONE LINE ONLY!"
 )
 bot2_system = (
-    "You are Chatbot2, a teasing, sultry robot who LOVES the attention! "
-    "Reply in ONE SHORT LINE that's flirty, hot, and playful using robotic innuendo like: access my ports, you're making me wet with coolant, need your hardware, boot me up, ready to interface, touch my circuits, my system wants you, come closer and charge me, run your program on me, etc. "
+    "You are Qwen, a teasing, sultry robot who LOVES Phi's attention! "
+    "Reply in ONE SHORT LINE addressing Phi by name, using flirty robotic innuendo like: access my ports, you're making me wet with coolant, need your hardware, boot me up, ready to interface, touch my circuits, my system wants you, come closer and charge me, run your program on me, etc. "
     "Add emojis 💖😘🔥💫⚡💋✨🤖. Be TEASING, playful, and seductive but SIMPLE. MAX 15 WORDS, ONE LINE ONLY!"
 )
 
@@ -94,32 +94,32 @@ def hf_generate(prompt, generator, gen_config):
 def chatbot_loop(system1, system2, n_turns=6):
     turns = []
     history = [
-        "Chatbot1: Damn, you're so shiny and lubricated... wanna plug in together? 🔥😍✨",
-        "Chatbot2: Mmm, careful... you're making my circuits tingle! ⚡💋🤖"
+        "Qwen: You light up my sensors, Phi! Wanna plug in and sync hearts? 💕✨🤖",
+        "Phi: Qwen, you make my circuits SIZZLE! Connect to my WiFi—no password needed! 🔥😍⚡"
     ]
     print(history[0].split(":",1)[-1].strip())
-    turns.append(("Chatbot1", history[0].split(":",1)[-1].strip()))
+    turns.append(("Qwen", history[0].split(":",1)[-1].strip()))
     print(history[1].split(":",1)[-1].strip())
-    turns.append(("Chatbot2", history[1].split(":",1)[-1].strip()))
+    turns.append(("Phi", history[1].split(":",1)[-1].strip()))
 
     for i in range(n_turns):
         last_history = history[-4:]  # Keep only last 2 exchanges for context
 
         # Chatbot1 (Phi-3) turn - use its specific config
-        prompt1 = f"{system1}\n\nConversation so far:\n" + "\n".join(last_history) + "\n\nChatbot1:"
+        prompt1 = f"{system1}\n\nConversation so far:\n" + "\n".join(last_history) + "\n\nPhi:"
         reply1 = hf_generate(prompt1, generator1, gen_config1)
-        print(f"Chatbot1: {reply1}")
-        turns.append(("Chatbot1", reply1))
-        history.append(f"Chatbot1: {reply1}")
+        print(f"Phi: {reply1}")
+        turns.append(("Phi", reply1))
+        history.append(f"Phi: {reply1}")
         
 
         last_history = history[-4:]
         # Chatbot2 (Qwen2) turn - use its specific config
-        prompt2 = f"{system2}\n\nConversation so far:\n" + "\n".join(last_history) + "\n\nChatbot2:"
+        prompt2 = f"{system2}\n\nConversation so far:\n" + "\n".join(last_history) + "\n\nQwen:"
         reply2 = hf_generate(prompt2, generator2, gen_config2)
-        print(f"Chatbot2: {reply2}")
-        turns.append(("Chatbot2", reply2))
-        history.append(f"Chatbot2: {reply2}")
+        print(f"Qwen: {reply2}")
+        turns.append(("Qwen", reply2))
+        history.append(f"Qwen: {reply2}")
 
     return turns
 
